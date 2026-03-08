@@ -1,16 +1,12 @@
-import { motion } from 'motion/react';
+import { motion, useScroll, useTransform } from 'motion/react';
 import { ArrowUpRight } from 'lucide-react';
-import type { Application } from '@splinetool/runtime';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useState, useRef } from 'react';
 import Spline from '@splinetool/react-spline';
-import BoxLoader from '@/components/ui/box-loader';
+import type { Application } from '@splinetool/runtime';
 import { CardStack, type CardStackItem } from '@/components/ui/card-stack';
 import { DetailModal } from '@/components/ui/detail-modal';
 
-const BACKGROUND_SCENE =
-  'https://prod.spline.design/EQavBdS0VzI0JMhz/scene.splinecode';
-const HERO_SCENE =
-  'https://prod.spline.design/t9GfLONmKieEKF4l/scene.splinecode';
+const HERO_SCENE = 'https://prod.spline.design/ZgdTbo0U2we-qDWq/scene.splinecode';
 
 type ExpertiseItem = CardStackItem & {
   number: string;
@@ -81,236 +77,74 @@ const expertiseItems: ExpertiseItem[] = [
 ];
 
 export default function App() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const backgroundAppRef = useRef<Application | null>(null);
-  const heroAppRef = useRef<Application | null>(null);
-  const [backgroundReady, setBackgroundReady] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [loaderMinElapsed, setLoaderMinElapsed] = useState(false);
-  const [showHeroSpline, setShowHeroSpline] = useState(false);
-  const appReady = backgroundReady && loaderMinElapsed;
   const [modalItem, setModalItem] = useState<(typeof expertiseItems)[number] | null>(null);
+  const heroContainerRef = useRef<HTMLDivElement>(null);
+  const splineAppRef = useRef<Application | null>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: heroContainerRef,
+    offset: ["start start", "end start"]
+  });
 
-  const handleBackgroundLoad = useCallback((app: Application) => {
-    backgroundAppRef.current = app;
-    app.setGlobalEvents(true);
-    app.play();
-    app.requestRender();
-    // Wait for the GPU to actually paint the first frames before revealing
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setBackgroundReady(true);
-      });
-    });
-  }, []);
-  const handleSplineLoad = useCallback((app: Application) => {
-    heroAppRef.current = app;
-    app.setGlobalEvents(true);
-    app.setZoom(1);
-    app.play();
-    app.requestRender();
-  }, []);
-  const heroDrop = {
-    hidden: { opacity: 0, y: -40 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] },
-    },
+  // Fade out the Spline scene in the last 5% of the scroll
+  const splineOpacity = useTransform(scrollYProgress, [0.95, 1], [1, 0]);
+
+  // Name appears as we enter the center ring — subtle rise + blur-to-sharp
+  const nameOpacity = useTransform(scrollYProgress, [0.93, 0.98], [0, 1]);
+  const nameY = useTransform(scrollYProgress, [0.93, 0.98], [40, 0]);
+  const nameBlur = useTransform(scrollYProgress, [0.93, 0.98], [12, 0]);
+
+  // Blur-to-sharp filter for the name
+  const nameFilter = useTransform(nameBlur, (v) => `blur(${v}px)`);
+
+  // Subtitle staggers slightly after the name
+  const subtitleOpacity = useTransform(scrollYProgress, [0.95, 0.99], [0, 1]);
+  const subtitleY = useTransform(scrollYProgress, [0.95, 0.99], [20, 0]);
+
+  const handleSplineLoad = (app: Application) => {
+    splineAppRef.current = app;
   };
 
-  useEffect(() => {
-    const media = window.matchMedia('(min-width: 1024px)');
-    const sync = () => setIsDesktop(media.matches);
-    sync();
-    media.addEventListener('change', sync);
-    return () => media.removeEventListener('change', sync);
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setLoaderMinElapsed(true), 1200);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    let moveRaf: number | null = null;
-    let lastMoveEvent: MouseEvent | null = null;
-
-    const getApps = () =>
-      [backgroundAppRef.current, heroAppRef.current].filter(
-        (app): app is Application => Boolean(app),
-      );
-
-    const dispatchMouse = (type: string, e: MouseEvent) => {
-      const apps = getApps();
-      apps.forEach((app) => {
-        app.canvas.dispatchEvent(
-          new MouseEvent(type, {
-            bubbles: true,
-            clientX: e.clientX,
-            clientY: e.clientY,
-            button: e.button,
-            buttons: e.buttons,
-            ctrlKey: e.ctrlKey,
-            shiftKey: e.shiftKey,
-            altKey: e.altKey,
-            metaKey: e.metaKey,
-            view: window,
-          }),
-        );
-        app.requestRender();
-      });
-    };
-
-    const handleMove = (e: MouseEvent) => {
-      lastMoveEvent = e;
-      if (moveRaf !== null) return;
-      moveRaf = window.requestAnimationFrame(() => {
-        moveRaf = null;
-        if (!lastMoveEvent) return;
-        dispatchMouse('mousemove', lastMoveEvent);
-      });
-    };
-
-    const handleDown = (e: MouseEvent) => dispatchMouse('mousedown', e);
-    const handleUp = (e: MouseEvent) => dispatchMouse('mouseup', e);
-    const handleClick = (e: MouseEvent) => dispatchMouse('click', e);
-
-    window.addEventListener('mousemove', handleMove, { passive: true });
-    window.addEventListener('mousedown', handleDown, { passive: true });
-    window.addEventListener('mouseup', handleUp, { passive: true });
-    window.addEventListener('click', handleClick, { passive: true });
-
-    return () => {
-      if (moveRaf !== null) window.cancelAnimationFrame(moveRaf);
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mousedown', handleDown);
-      window.removeEventListener('mouseup', handleUp);
-      window.removeEventListener('click', handleClick);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!appReady || !isDesktop) {
-      setShowHeroSpline(false);
-      return;
-    }
-
-    let timeoutId: number | null = null;
-    let idleId: number | null = null;
-
-    const startHeroSpline = () => {
-      timeoutId = window.setTimeout(() => setShowHeroSpline(true), 600);
-    };
-
-    if ('requestIdleCallback' in window) {
-      idleId = window.requestIdleCallback(startHeroSpline, { timeout: 1800 });
-    } else {
-      startHeroSpline();
-    }
-
-    return () => {
-      if (timeoutId !== null) window.clearTimeout(timeoutId);
-      if (idleId !== null && 'cancelIdleCallback' in window) {
-        window.cancelIdleCallback(idleId);
-      }
-    };
-  }, [appReady, isDesktop]);
-
   return (
-    <div
-      ref={containerRef}
-      className="relative isolate text-white"
-    >
-      <div aria-hidden="true" className="fixed inset-0 z-0 bg-white" />
-      <div
-        aria-hidden="true"
-        style={{ willChange: appReady ? 'auto' : 'opacity' }}
-        className={`pointer-events-none fixed inset-0 z-0 overflow-hidden transition-opacity duration-700 ease-out ${
-          appReady ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        <Spline
-          scene={BACKGROUND_SCENE}
-          className="background-spline h-full w-full"
-          onLoad={handleBackgroundLoad}
-        />
-      </div>
+    <div className="relative isolate text-white">
+      <div aria-hidden="true" className="fixed inset-0 z-0 bg-black" />
 
-      <div
-        style={{ willChange: appReady ? 'auto' : 'opacity' }}
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-white transition-opacity duration-700 ease-out ${
-          appReady ? 'pointer-events-none opacity-0' : 'opacity-100'
-        }`}
-      >
-        <BoxLoader />
-      </div>
-
-      <div
-        className={`relative z-10 transition-opacity duration-400 ${
-          appReady ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        {/* Hero */}
-        <section className="min-h-screen flex items-center justify-center px-8 relative overflow-hidden">
-          {showHeroSpline && (
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 -right-[3vw] z-[14] hidden w-[58vw] min-w-[520px] max-w-[980px] items-start justify-end pt-6 lg:flex"
-            >
-              <div
-                aria-hidden="true"
-                className="absolute inset-y-[12%] right-[4%] w-[78%] rounded-[40%] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0.08)_34%,rgba(255,255,255,0)_74%)] blur-xl"
-              />
-              <div className="spline-stage relative h-[86vh] w-full -translate-y-[8%] translate-x-[6%] scale-[1.08] overflow-hidden opacity-[0.96] [filter:brightness(1.06)_contrast(1.04)_drop-shadow(0_0_14px_rgba(255,255,255,0.1))]">
-                <Spline
-                  scene={HERO_SCENE}
-                  className="spline-canvas h-full w-full"
-                  onLoad={handleSplineLoad}
-                />
-              </div>
-            </div>
-          )}
-
+      <div className="relative z-10">
+        {/* Hero with Spline - Scroll container */}
+        <section
+          ref={heroContainerRef}
+          className="relative h-[6500vh]"
+        >
+          {/* Sticky Spline that stays in view while scrolling */}
           <motion.div
-            className="relative z-20 max-w-screen-2xl mx-auto w-full"
-            initial="hidden"
-            animate="show"
-            transition={{ staggerChildren: 0.12, delayChildren: 0.1 }}
+            className="sticky top-0 h-screen w-full overflow-hidden"
+            style={{ opacity: splineOpacity }}
           >
-            <motion.div variants={heroDrop}>
-              <h1 className="-ml-3 md:-ml-6 text-[12vw] md:text-[9vw] font-bold leading-[0.9] tracking-tight mb-12 text-black">
-                MICHAEL
-                <br />
-                LOMBARDI
-              </h1>
-            </motion.div>
+            <Spline
+              scene={HERO_SCENE}
+              onLoad={handleSplineLoad}
+              className="w-full h-full"
+            />
 
-            <motion.div className="flex items-end" variants={heroDrop}>
-              <div className="max-w-md">
-                <p className="text-lg text-neutral-400 mb-8">
-                  Building scalable systems that transform sales, marketing, and
-                  operations into predictable growth engines.
-                </p>
-                <motion.button
-                  className="group relative overflow-hidden px-8 py-4 bg-white text-black text-sm tracking-wider"
-                  whileHover="hover"
-                >
-                  <motion.div
-                    className="absolute inset-0 bg-neutral-800"
-                    initial={{ x: '-100%' }}
-                    variants={{
-                      hover: { x: 0 },
-                    }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  <span className="relative z-10 group-hover:text-white transition-colors flex items-center gap-2">
-                    GET IN TOUCH
-                    <ArrowUpRight className="w-4 h-4" />
-                  </span>
-                </motion.button>
-              </div>
-            </motion.div>
+            {/* Name + subtitle centered in the last ring */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+              <motion.h1
+                className="text-7xl md:text-[8rem] lg:text-[10rem] font-bold text-white leading-none tracking-tight"
+                style={{
+                  opacity: nameOpacity,
+                  y: nameY,
+                  filter: nameFilter,
+                }}
+              >
+                Michael Lombardi
+              </motion.h1>
+              <motion.p
+                className="mt-4 text-lg md:text-2xl tracking-[0.35em] uppercase text-white/70"
+                style={{ opacity: subtitleOpacity, y: subtitleY }}
+              >
+                Growth Architect
+              </motion.p>
+            </div>
           </motion.div>
         </section>
 
