@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import { ArrowUpRight } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Spline from '@splinetool/react-spline';
 import type { Application } from '@splinetool/runtime';
 import { CardStack, type CardStackItem } from '@/components/ui/card-stack';
@@ -104,6 +104,24 @@ export default function App() {
   const handleSplineLoad = (app: Application) => {
     splineAppRef.current = app;
   };
+
+  // Scroll speed multiplier — 5x faster through the hero section
+  useEffect(() => {
+    const hero = heroContainerRef.current;
+    if (!hero) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      const rect = hero.getBoundingClientRect();
+      const inHero = rect.top <= 0 && rect.bottom > window.innerHeight;
+      if (inHero) {
+        e.preventDefault();
+        window.scrollBy({ top: e.deltaY * 5 });
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, []);
 
   return (
     <div className="relative isolate text-white">
