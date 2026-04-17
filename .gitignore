@@ -18,3 +18,9 @@ yarn-error.log*
 
 # Tooling artifacts
 playwright-*.png
+
+# Claude Code local settings (per-machine, should not be committed)
+.claude/
+
+# Playwright MCP session logs + screenshots
+.playwright-mcp/

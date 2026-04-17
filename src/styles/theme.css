@@ -2,6 +2,7 @@
 
 :root {
   --font-size: 16px;
+  --accent-red: #FF3A2D;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;
@@ -133,6 +134,7 @@
 
   body {
     margin: 0;
+    font-family: 'General Sans', sans-serif;
     @apply bg-background text-foreground;
   }
 
