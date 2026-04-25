@@ -1,151 +1,176 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { motion } from 'motion/react';
-import { useTextScramble, InfoLine, ScrambleBlock } from '@/components/scramble';
-import type { ScrambleMode } from '@/components/scramble';
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
-// ── MouseSmoke ─────────────────────────────────────────────────────────────────
+// ── Color tokens ─────────────────────────────────────────────────────────────
+// - INK:    primary typography (warm off-white, tinted toward the accent hue)
+// - ACCENT: red, reserved for structural elements and small callouts
+// - MUTED:  dim ink for secondary copy
 
-interface Particle {
-  x: number; y: number;
-  vx: number; vy: number;
-  radius: number;
-  alpha: number;
-  decay: number;
+const INK = '#F5EFE8';
+const ACCENT = '#FF3A2D';
+
+// ── Content ──────────────────────────────────────────────────────────────────
+
+// Proof cards — a single rotating slot on the right side. Each card is a
+// three-part composition: big number, descriptor, attribution. Together they
+// prove range without a list.
+
+interface ProofCard {
+  metric: string;
+  descriptor: string;
+  attribution: string;
 }
 
-function MouseSmoke() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particles = useRef<Particle[]>([]);
-  const mouse = useRef({ x: -999, y: -999 });
-  const raf = useRef<number>(0);
+const PROOF_CARDS: ProofCard[] = [
+  { metric: '$2M',  descriptor: 'Pre-seed raised',        attribution: 'Fansub · Atento Capital · 2022' },
+  { metric: '30K',  descriptor: 'Festival attendees',     attribution: 'Produced end-to-end · 2023' },
+  { metric: '×3',   descriptor: "President\u2019s Club",  attribution: 'PHMG · Senior SDR, Team Lead' },
+  { metric: '104%', descriptor: 'Q1 quota attainment',    attribution: 'ServiceTitan · SMB Trades' },
+  { metric: '50K',  descriptor: 'Users on platform',      attribution: 'Fansub · creator economy' },
+  { metric: '38%',  descriptor: 'Conversion lift',        attribution: 'Enertia Studios · med spa client' },
+  { metric: '4×',   descriptor: 'ROAS on $100K+ spend',   attribution: '720 Digital · 2019\u20132020' },
+  { metric: '75%',  descriptor: 'Renewal rate',           attribution: 'Scripted · $500K enterprise book' },
+];
 
-  useEffect(() => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext('2d')!;
+// ── Background wash: three drifting red orbs create ambient color temperature
+// Each orb animates on its own cycle (28s / 34s / 42s) so the pattern never
+// repeats — slow enough to feel atmospheric, not distracting. Inset -12%
+// gives the drift room so hard edges never appear at the viewport boundary.
 
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    const onMove = (e: MouseEvent) => {
-      mouse.current = { x: e.clientX, y: e.clientY };
-      // Spawn 3-5 particles per frame of movement
-      const count = 4;
-      for (let i = 0; i < count; i++) {
-        particles.current.push({
-          x: e.clientX + (Math.random() - 0.5) * 8,
-          y: e.clientY + (Math.random() - 0.5) * 8,
-          vx: (Math.random() - 0.5) * 0.6,
-          vy: -(Math.random() * 1.2 + 0.4),
-          radius: Math.random() * 18 + 8,
-          alpha: Math.random() * 0.18 + 0.06,
-          decay: Math.random() * 0.012 + 0.008,
-        });
-      }
-    };
-    window.addEventListener('mousemove', onMove);
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let i = particles.current.length - 1; i >= 0; i--) {
-        const p = particles.current[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.radius += 0.4;
-        p.alpha -= p.decay;
-        if (p.alpha <= 0) { particles.current.splice(i, 1); continue; }
-
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-        grad.addColorStop(0, `rgba(255, 58, 45, ${p.alpha})`);
-        grad.addColorStop(1, `rgba(255, 58, 45, 0)`);
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = grad;
-        ctx.fill();
-      }
-      raf.current = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', onMove);
-      cancelAnimationFrame(raf.current);
-    };
-  }, []);
-
+function BackgroundWash() {
   return (
-    <canvas
-      ref={canvasRef}
+    <div
+      aria-hidden
       style={{
-        position: 'fixed', inset: 0,
+        position: 'absolute',
+        inset: 0,
+        overflow: 'hidden',
         pointerEvents: 'none',
-        zIndex: 50,
+        zIndex: 0,
+      }}
+    >
+      <motion.div
+        animate={{ x: [0, 80, -40, 0], y: [0, -60, 40, 0] }}
+        transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute',
+          inset: '-12%',
+          background:
+            'radial-gradient(ellipse 44% 32% at 18% 32%, rgba(255, 58, 45, 0.18) 0%, transparent 60%)',
+        }}
+      />
+      <motion.div
+        animate={{ x: [0, -60, 40, 0], y: [0, 50, -30, 0] }}
+        transition={{ duration: 34, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute',
+          inset: '-12%',
+          background:
+            'radial-gradient(ellipse 38% 28% at 82% 78%, rgba(255, 58, 45, 0.13) 0%, transparent 62%)',
+        }}
+      />
+      <motion.div
+        animate={{ x: [0, 40, -30, 0], y: [0, 30, -20, 0] }}
+        transition={{ duration: 42, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute',
+          inset: '-12%',
+          background:
+            'radial-gradient(ellipse 50% 34% at 50% 102%, rgba(255, 58, 45, 0.09) 0%, transparent 65%)',
+        }}
+      />
+    </div>
+  );
+}
+
+// ── Film grain overlay — red-tinted, layered on warm base ────────────────────
+
+const GRAIN_URL = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 0.42  0 0 0 0 0.36  0 0 0 0.28 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")`;
+
+function GrainOverlay() {
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: GRAIN_URL,
+        backgroundSize: '300px 300px',
+        mixBlendMode: 'screen',
+        opacity: 0.38,
+        pointerEvents: 'none',
+        zIndex: 1,
       }}
     />
   );
 }
 
-// ── ScrollIndicator ───────────────────────────────────────────────────────────
+// ── Corner marks ─────────────────────────────────────────────────────────────
 
-function ScrollIndicator({ show }: { show: boolean }) {
-  const [phase, setPhase] = useState<'in' | 'idle' | 'out'>('in');
-  const mounted = useRef(false);
+function CornerMark({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
+  const size = 22;
+  const color = 'rgba(255, 58, 45, 0.4)';
+  const inset = 28;
 
-  useEffect(() => {
-    if (!show || mounted.current) return;
-    mounted.current = true;
-    setPhase('in');
-  }, [show]);
+  const base: React.CSSProperties = {
+    position: 'absolute',
+    width: size,
+    height: size,
+    pointerEvents: 'none',
+    zIndex: 6,
+  };
 
-  const handleEntered = useCallback(() => {
-    setPhase('idle');
-    setTimeout(() => setPhase('out'), 4200);
-  }, []);
-
-  const handleExited = useCallback(() => {
-    setTimeout(() => setPhase('in'), 300);
-  }, []);
-
-  if (!show) return null;
+  const lines: Record<typeof position, React.CSSProperties> = {
+    tl: { top: inset, left: inset, borderTop: `1px solid ${color}`, borderLeft: `1px solid ${color}` },
+    tr: { top: inset, right: inset, borderTop: `1px solid ${color}`, borderRight: `1px solid ${color}` },
+    bl: { bottom: inset, left: inset, borderBottom: `1px solid ${color}`, borderLeft: `1px solid ${color}` },
+    br: { bottom: inset, right: inset, borderBottom: `1px solid ${color}`, borderRight: `1px solid ${color}` },
+  };
 
   return (
-    <ScrambleBlock
-      lines={['SCROLL', 'DOWN']}
-      style={{
-        position: 'fixed',
-        bottom: '7%',
-        right: '4%',
-        zIndex: 20,
-        textAlign: 'right',
-      }}
-      fontSize={11}
-      phase={phase}
-      onEntered={handleEntered}
-      onExited={handleExited}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+      style={{ ...base, ...lines[position] }}
     />
   );
 }
 
-// ── NavPills ──────────────────────────────────────────────────────────────────
+// ── Nav pills ────────────────────────────────────────────────────────────────
 
 function NavPills() {
   return (
     <motion.div
-      style={{ position: 'absolute', top: 32, left: 32, display: 'flex', flexDirection: 'column', gap: 8, zIndex: 20 }}
-      initial={{ opacity: 0, y: -8 }}
+      style={{
+        position: 'absolute',
+        top: 48,
+        left: 60,
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 10,
+        zIndex: 20,
+      }}
+      initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: 0.3 }}
+      transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
     >
-      {['MENU', "LET'S TALK"].map(label => (
-        <button key={label} style={{
-          background: '#FF3A2D', color: '#000', border: 'none', borderRadius: 999,
-          padding: '8px 20px', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em',
-          cursor: 'pointer', fontFamily: 'inherit',
-        }}>
+      {['MENU', "LET\u2019S TALK"].map(label => (
+        <button
+          key={label}
+          style={{
+            background: ACCENT,
+            color: '#000',
+            border: 'none',
+            borderRadius: 999,
+            padding: '9px 22px',
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.14em',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
+        >
           {label}
         </button>
       ))}
@@ -153,256 +178,513 @@ function NavPills() {
   );
 }
 
-// ── ScatteredNumbers ──────────────────────────────────────────────────────────
+// ── MaskReveal ───────────────────────────────────────────────────────────────
 
-const NUMBER_DATA = [
-  { v: '264', top: '8%',  left: '6%'  }, { v: '300', top: '12%', left: '28%' },
-  { v: '345', top: '5%',  left: '52%' }, { v: '370', top: '9%',  left: '74%' },
-  { v: '375', top: '15%', left: '88%' }, { v: '241', top: '22%', left: '4%'  },
-  { v: '547', top: '28%', left: '32%' }, { v: '460', top: '25%', left: '60%' },
-  { v: '552', top: '32%', left: '82%' }, { v: '380', top: '38%', left: '20%' },
-  { v: '270', top: '40%', left: '50%' }, { v: '301', top: '42%', left: '70%' },
-  { v: '248', top: '48%', left: '8%'  }, { v: '391', top: '50%', left: '42%' },
-  { v: '462', top: '52%', left: '88%' }, { v: '189', top: '58%', left: '26%' },
-  { v: '520', top: '60%', left: '62%' }, { v: '415', top: '62%', left: '78%' },
-  { v: '330', top: '68%', left: '4%'  }, { v: '490', top: '70%', left: '34%' },
-  { v: '220', top: '72%', left: '56%' }, { v: '475', top: '75%', left: '90%' },
-  { v: '285', top: '80%', left: '16%' }, { v: '395', top: '82%', left: '48%' },
-  { v: '510', top: '78%', left: '72%' },
-];
-
-function ScatteredNumbers() {
+function MaskReveal({
+  children,
+  delay = 0,
+  duration = 0.9,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  duration?: number;
+}) {
   return (
-    <>
-      {NUMBER_DATA.map((n, i) => (
-        <motion.div key={i} style={{
-          position: 'absolute', top: n.top, left: n.left, color: '#FF3A2D',
-          fontSize: 10, fontWeight: 500, letterSpacing: '0.05em',
-          pointerEvents: 'none', userSelect: 'none', lineHeight: 1,
-        }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.28 }}
-          transition={{ duration: 0.5, delay: i * 0.03 }}
-        >
-          {n.v}<sup style={{ fontSize: 7 }}>2</sup>
-        </motion.div>
-      ))}
-    </>
+    <div style={{ overflow: 'hidden', lineHeight: 1 }}>
+      <motion.div
+        initial={{ y: '110%' }}
+        animate={{ y: 0 }}
+        transition={{ duration, delay, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 }
 
-// ── OutlineName ───────────────────────────────────────────────────────────────
+// ── ThesisBlock — editorial voice, primary on the right column ───────────────
+// Short dek that establishes voice and positioning. Role words are red+bold
+// inline — the magazine pull-quote pattern, where accent color punches
+// individual nouns inside a warm-white paragraph.
 
-function OutlineName({ show }: { show: boolean }) {
+const ROLES: string[] = [
+  'Founder',
+  'CMO',
+  'Head of Strategic Relations',
+  'AI Solutions Architect',
+  'Enterprise Account Manager',
+  'Team Lead',
+];
+
+function ThesisBlock() {
   return (
-    <motion.div style={{
-      position: 'absolute', bottom: '2%', left: 0, right: 0,
-      pointerEvents: 'none', userSelect: 'none', lineHeight: 0.83, paddingLeft: '2vw',
-    }}
-      initial={{ y: 50, opacity: 0 }}
-      animate={show ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
-      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 1.1, ease: [0.16, 1, 0.3, 1] }}
+      style={{ marginBottom: 72 }}
     >
-      {['MICHAEL', 'LOMBARDI'].map(word => (
-        <div key={word} style={{
-          fontSize: 'clamp(72px, 13vw, 200px)', fontWeight: 700,
-          color: 'transparent', WebkitTextStroke: '1.5px #FF3A2D',
-          display: 'block', letterSpacing: '-0.02em',
-        }}>
-          {word}
-        </div>
-      ))}
+      {/* Editorial paragraph — setup line + inline red-bold role names */}
+      <p
+        style={{
+          margin: 0,
+          color: INK,
+          fontSize: 'clamp(22px, 2vw, 32px)',
+          fontWeight: 500,
+          letterSpacing: '-0.005em',
+          lineHeight: 1.4,
+          opacity: 0.92,
+          marginBottom: 32,
+        }}
+      >
+        Five years operating every side of every org.{' '}
+        {ROLES.map((role, i) => (
+          <span key={role}>
+            <span style={{ color: '#FFFFFF', fontWeight: 700 }}>{role}.</span>
+            {i < ROLES.length - 1 ? ' ' : ''}
+          </span>
+        ))}
+      </p>
+
+      {/* Punchline */}
+      <div
+        style={{
+          color: ACCENT,
+          fontSize: 'clamp(22px, 2vw, 32px)',
+          fontWeight: 700,
+          letterSpacing: '-0.005em',
+          lineHeight: 1.2,
+        }}
+      >
+        Operator. Builder. Orchestrator.
+      </div>
     </motion.div>
   );
 }
 
-// ── Content ───────────────────────────────────────────────────────────────────
+// ── ProofCardRotator — secondary block below thesis ──────────────────────────
+// Scaled down from its earlier "hero-weight" size to read as supporting
+// evidence beneath the thesis. Still rotates every 7.5s.
 
-// The two intro lines that appear first in the bottom-left corner
-const INTRO_NAME:  string[] = ['Michael Lombardi'];
-const INTRO_ROLE:  string[] = ['Growth Systems Architect'];
-
-// Bottom-left corner positions, stacked (role above, name below)
-const INTRO_ROLE_STYLE: React.CSSProperties = { bottom: '42%', left: '6%' };
-const INTRO_NAME_STYLE: React.CSSProperties = { bottom: '38%', left: '6%' };
-
-// Descriptors that parade one at a time after the name reveals
-const PARADE_CONTENT: string[][] = [
-  ['Founder / Operator'],
-  ['Building Zero to One'],
-  ['Former Co-Founder', 'Venture-Backed Startup'],
-  ['Creative Operator'],
-  ['GTM Architecture'],
-  ['Revenue Systems'],
-  ['Open to Opportunities'],
-];
-
-// 7 positions spread across the upper viewport — each used in rotation
-const PARADE_POSITIONS: React.CSSProperties[] = [
-  { top: '11%', left: '8%'  },
-  { top: '13%', left: '52%' },
-  { top: '11%', right: '8%' },
-  { top: '30%', left: '22%' },
-  { top: '28%', right: '10%'},
-  { top: '47%', left: '10%' },
-  { top: '47%', right: '14%'},
-];
-
-// How long each parade block stays visible before exiting
-const SIT_MS = 3800;
-// How many ms into the current block's exit the next block starts appearing
-const OVERLAP_MS = 500;
-
-// ── HeroSection ───────────────────────────────────────────────────────────────
-
-type IntroState =
-  | 'waiting'       // before sequence starts
-  | 'name-in'       // "Michael Lombardi" entering
-  | 'role-in'       // "Growth Systems Architect" entering
-  | 'sitting'       // both visible, reading time
-  | 'exiting';      // both scrambling out
-
-interface LiveBlock {
-  id: number;
-  lines: string[];
-  position: React.CSSProperties;
-  phase: 'in' | 'idle' | 'out';
-}
-
-export default function HeroSection() {
-  const [introState, setIntroState] = useState<IntroState>('waiting');
-  const [showRole, setShowRole] = useState(false);   // mount GSA block
-  const [introMounted, setIntroMounted] = useState(true);
-  const [showName, setShowName] = useState(false);
-  const [paradeActive, setParadeActive] = useState(false);
-  const [liveBlocks, setLiveBlocks] = useState<LiveBlock[]>([]);
-
-  const paradeContent = useRef(0);
-  const paradePosition = useRef(0);
-  const blockId = useRef(0);
-  const introExited = useRef(0);
-
-  // ── Phase 1: kick off intro after a short pause
-  useEffect(() => {
-    const t = setTimeout(() => setIntroState('name-in'), 600);
-    return () => clearTimeout(t);
-  }, []);
-
-  // ── "Michael Lombardi" finished entering → wait a beat → start role
-  const handleNameEntered = useCallback(() => {
-    setTimeout(() => {
-      setShowRole(true);
-      setIntroState('role-in');
-    }, 320);
-  }, []);
-
-  // ── "Growth Systems Architect" finished entering → sit, then exit both
-  const handleRoleEntered = useCallback(() => {
-    setIntroState('sitting');
-    setTimeout(() => {
-      setIntroState('exiting');
-      // 400ms into exit: reveal the big name
-      setTimeout(() => setShowName(true), 400);
-      // 1400ms after name appears: start parade
-      setTimeout(() => setParadeActive(true), 1800);
-    }, 2000);
-  }, []);
-
-  // ── Track when both intro blocks have finished exiting so we can unmount them
-  const handleIntroExited = useCallback(() => {
-    introExited.current += 1;
-    if (introExited.current >= 2) setIntroMounted(false);
-  }, []);
-
-  // ── Parade: spawn one block at a time ─────────────────────────────────────
-
-  const spawnBlock = useCallback(() => {
-    const id = ++blockId.current;
-    const ci = paradeContent.current++ % PARADE_CONTENT.length;
-    const pi = paradePosition.current++ % PARADE_POSITIONS.length;
-    setLiveBlocks(prev => [...prev, {
-      id, lines: PARADE_CONTENT[ci], position: PARADE_POSITIONS[pi], phase: 'in',
-    }]);
-  }, []);
+function ProofCardRotator({
+  pool,
+  interval = 7500,
+  delay = 1.4,
+}: {
+  pool: ProofCard[];
+  interval?: number;
+  delay?: number;
+}) {
+  const [index, setIndex] = useState(0);
+  const [active, setActive] = useState(false);
+  const total = pool.length;
 
   useEffect(() => {
-    if (paradeActive) spawnBlock();
-  }, [paradeActive, spawnBlock]);
+    const id = setTimeout(() => setActive(true), delay * 1000);
+    return () => clearTimeout(id);
+  }, [delay]);
 
-  const handleBlockEntered = useCallback((id: number) => {
-    // Move to idle (visible, holding)
-    setLiveBlocks(prev => prev.map(b => b.id === id ? { ...b, phase: 'idle' } : b));
-    // After sit time: start exit AND overlap-spawn next block
-    setTimeout(() => {
-      setLiveBlocks(prev => prev.map(b => b.id === id ? { ...b, phase: 'out' } : b));
-      setTimeout(spawnBlock, OVERLAP_MS);
-    }, SIT_MS);
-  }, [spawnBlock]);
+  useEffect(() => {
+    if (!active) return;
+    const id = setInterval(() => setIndex(i => (i + 1) % total), interval);
+    return () => clearInterval(id);
+  }, [active, interval, total]);
 
-  const handleBlockExited = useCallback((id: number) => {
-    setLiveBlocks(prev => prev.filter(b => b.id !== id));
-  }, []);
-
-  // ── Derive intro block phases ─────────────────────────────────────────────
-
-  const namePhase = (): 'in' | 'idle' | 'out' => {
-    if (introState === 'name-in') return 'in';
-    if (introState === 'exiting') return 'out';
-    return 'idle';
-  };
-
-  const rolePhase = (): 'in' | 'idle' | 'out' => {
-    if (introState === 'role-in') return 'in';
-    if (introState === 'exiting') return 'out';
-    return 'idle';
-  };
+  const current = pool[index];
 
   return (
-    <div style={{
-      position: 'relative', width: '100vw', height: '100vh',
-      background: '#000000', overflow: 'hidden',
-      fontFamily: "'General Sans', sans-serif",
-    }}>
-      <MouseSmoke />
-      <ScatteredNumbers />
-      <NavPills />
-      <ScrollIndicator show={showName} />
-
-      {/* ── Intro: name + role in bottom-left corner ── */}
-      {introMounted && (
-        <>
-          <ScrambleBlock
-            lines={INTRO_NAME}
-            style={INTRO_NAME_STYLE}
-            phase={namePhase()}
-            onEntered={handleNameEntered}
-            onExited={handleIntroExited}
-          />
-          {showRole && (
-            <ScrambleBlock
-              lines={INTRO_ROLE}
-              style={INTRO_ROLE_STYLE}
-              phase={rolePhase()}
-              onEntered={handleRoleEntered}
-              onExited={handleIntroExited}
-            />
-          )}
-        </>
-      )}
-
-      {/* ── Parade: one descriptor at a time, scattered positions ── */}
-      {liveBlocks.map(block => (
-        <ScrambleBlock
-          key={block.id}
-          lines={block.lines}
-          style={block.position}
-          phase={block.phase}
-          onEntered={() => handleBlockEntered(block.id)}
-          onExited={() => handleBlockExited(block.id)}
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+      style={{ width: '100%' }}
+    >
+      {/* Header rule + label (compact) */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          marginBottom: 22,
+        }}
+      >
+        <span
+          style={{
+            width: 24,
+            height: 1,
+            background: ACCENT,
+            opacity: 0.75,
+          }}
         />
-      ))}
+        <span
+          style={{
+            color: ACCENT,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.28em',
+            textTransform: 'uppercase',
+            opacity: 0.8,
+          }}
+        >
+          Proof / {String(index + 1).padStart(2, '0')}
+          <span style={{ opacity: 0.4 }}> / {String(total).padStart(2, '0')}</span>
+        </span>
+      </div>
 
-      <OutlineName show={showName} />
-    </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current.metric + current.descriptor}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* Compact two-column: metric on left, copy on right */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'auto 1fr',
+              gap: '0 24px',
+              alignItems: 'baseline',
+            }}
+          >
+            <div
+              style={{
+                color: INK,
+                fontSize: 'clamp(40px, 4.6vw, 72px)',
+                fontWeight: 700,
+                letterSpacing: '-0.03em',
+                lineHeight: 0.95,
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {current.metric}
+            </div>
+            <div>
+              <div
+                style={{
+                  color: INK,
+                  fontSize: 'clamp(15px, 1.35vw, 20px)',
+                  fontWeight: 500,
+                  letterSpacing: '0.01em',
+                  lineHeight: 1.3,
+                  opacity: 0.88,
+                  marginBottom: 6,
+                }}
+              >
+                {current.descriptor}
+              </div>
+              <div
+                style={{
+                  color: ACCENT,
+                  fontSize: 'clamp(10px, 0.85vw, 12px)',
+                  fontWeight: 600,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  opacity: 0.7,
+                  lineHeight: 1.5,
+                }}
+              >
+                {current.attribution}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Progress dots */}
+      <div
+        style={{
+          marginTop: 28,
+          display: 'flex',
+          gap: 5,
+        }}
+      >
+        {pool.map((_, i) => (
+          <div
+            key={i}
+            style={{
+              width: i === index ? 16 : 5,
+              height: 2,
+              background: ACCENT,
+              opacity: i === index ? 0.85 : 0.25,
+              transition: 'width 0.4s ease, opacity 0.4s ease',
+            }}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Vertical rule ────────────────────────────────────────────────────────────
+
+function VerticalRule() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scaleY: 0 }}
+      animate={{ opacity: 0.14, scaleY: 1 }}
+      transition={{ duration: 1.1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        position: 'absolute',
+        top: '22%',
+        bottom: '22%',
+        left: '54%',
+        width: 1,
+        background: ACCENT,
+        transformOrigin: 'top center',
+        zIndex: 3,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
+// ── Colophon (bottom) ────────────────────────────────────────────────────────
+
+function Colophon() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 0.65 }}
+      transition={{ duration: 0.8, delay: 1.5 }}
+      style={{
+        position: 'absolute',
+        bottom: 56,
+        left: 60,
+        right: 60,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 20,
+        zIndex: 10,
+        pointerEvents: 'none',
+      }}
+    >
+      <span
+        style={{
+          color: ACCENT,
+          fontSize: 12,
+          fontWeight: 700,
+          letterSpacing: '0.24em',
+          textTransform: 'uppercase',
+          fontVariantNumeric: 'tabular-nums',
+          flexShrink: 0,
+        }}
+      >
+        VOL.03 / ED.01
+      </span>
+      <span
+        style={{
+          flex: 1,
+          height: 1,
+          background: 'linear-gradient(90deg, rgba(255,58,45,0.4) 0%, rgba(255,58,45,0.1) 100%)',
+        }}
+      />
+      <span
+        style={{
+          color: INK,
+          fontSize: 15,
+          fontWeight: 700,
+          letterSpacing: '0.22em',
+          textTransform: 'uppercase',
+          opacity: 0.85,
+          flexShrink: 0,
+        }}
+      >
+        ARCHITECTING GROWTH SYSTEMS
+      </span>
+      <span
+        style={{
+          flex: 1,
+          height: 1,
+          background: 'linear-gradient(90deg, rgba(255,58,45,0.1) 0%, rgba(255,58,45,0.4) 100%)',
+        }}
+      />
+      <span
+        style={{
+          color: ACCENT,
+          fontSize: 12,
+          fontWeight: 700,
+          letterSpacing: '0.24em',
+          textTransform: 'uppercase',
+          flexShrink: 0,
+        }}
+      >
+        CHICAGO · TULSA · LA
+      </span>
+    </motion.div>
+  );
+}
+
+// ── ScrollCue ────────────────────────────────────────────────────────────────
+
+function ScrollCue() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 0.72 }}
+      transition={{ duration: 0.6, delay: 1.7, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        position: 'absolute',
+        bottom: 96,
+        right: 60,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        zIndex: 10,
+        pointerEvents: 'none',
+      }}
+    >
+      <span
+        style={{
+          color: INK,
+          fontSize: 12,
+          fontWeight: 700,
+          letterSpacing: '0.24em',
+          textTransform: 'uppercase',
+          opacity: 0.8,
+        }}
+      >
+        EXPERIENCE
+      </span>
+      <motion.span
+        animate={{ y: [0, 4, 0] }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ color: ACCENT, fontSize: 14, lineHeight: 1 }}
+      >
+        ↓
+      </motion.span>
+    </motion.div>
+  );
+}
+
+// ── HeroSection ──────────────────────────────────────────────────────────────
+
+export default function HeroSection() {
+  return (
+    <section
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100vh',
+        background: '#000000',
+        overflow: 'hidden',
+        fontFamily: "'General Sans', sans-serif",
+      }}
+    >
+      {/* Ambient red wash — warms the surface */}
+      <BackgroundWash />
+
+      {/* Frame */}
+      <CornerMark position="tl" />
+      <CornerMark position="tr" />
+      <CornerMark position="bl" />
+      <CornerMark position="br" />
+
+      {/* Material */}
+      <GrainOverlay />
+
+      {/* Spine */}
+      <VerticalRule />
+
+      {/* Chrome */}
+      <NavPills />
+
+      {/* Primary composition: LEFT = identity, RIGHT = proof */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '6vw',
+          right: '6vw',
+          transform: 'translateY(-50%)',
+          display: 'grid',
+          gridTemplateColumns: '1fr 0.55fr',
+          gap: '6vw',
+          alignItems: 'start',
+          zIndex: 5,
+        }}
+      >
+        {/* LEFT — identity block */}
+        <div style={{ paddingTop: 20 }}>
+          {/* Name — warm off-white */}
+          <div
+            style={{
+              fontSize: 'clamp(64px, 10.5vw, 192px)',
+              fontWeight: 700,
+              color: INK,
+              letterSpacing: '-0.035em',
+              lineHeight: 0.92,
+              marginBottom: 28,
+            }}
+          >
+            <MaskReveal delay={0.5}>
+              <div>MICHAEL</div>
+            </MaskReveal>
+            <MaskReveal delay={0.63}>
+              <div>LOMBARDI</div>
+            </MaskReveal>
+          </div>
+
+          {/* Role — white with pulsing red dot + italic accent */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.05, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              flexWrap: 'wrap',
+            }}
+          >
+            <motion.span
+              animate={{ opacity: [1, 0.35, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: ACCENT,
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                color: INK,
+                fontSize: 'clamp(22px, 2.2vw, 34px)',
+                fontWeight: 600,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                opacity: 0.92,
+              }}
+            >
+              Growth Systems Architect
+            </span>
+            <span
+              style={{
+                color: INK,
+                fontSize: 'clamp(18px, 1.7vw, 26px)',
+                fontWeight: 400,
+                fontStyle: 'italic',
+                letterSpacing: '0.02em',
+                opacity: 0.45,
+              }}
+            >
+              — operator, founder, builder.
+            </span>
+          </motion.div>
+        </div>
+
+        {/* RIGHT — editorial thesis (primary) + rotating proof card (secondary) */}
+        <div style={{ paddingTop: 16 }}>
+          <ThesisBlock />
+          <ProofCardRotator pool={PROOF_CARDS} />
+        </div>
+      </div>
+
+      <ScrollCue />
+      <Colophon />
+    </section>
   );
 }

@@ -15,77 +15,171 @@ const ACTS: Act[] = [
     experiences: [
       {
         index: '01',
-        company: 'SERVICETITAN',
-        role: 'SALES DEVELOPMENT REP',
-        year: '2024',
-        stat: 'TOP-OF-FUNNEL PIPELINE',
-        descriptor: 'SaaS outbound at enterprise scale',
-        hook: 'Pipeline is only as good as what goes into it. I learned to fill it right.',
-        pageVariant: 'kinetic',
+        company: 'ENERTIA STUDIOS',
+        role: 'FREELANCE AI SYSTEMS ARCHITECT',
+        year: '2025 — Present',
+        stat: '44% OPEN · 7% REPLY · 38% CVR LIFT',
+        descriptor: 'Solo AI studio for service businesses',
+        hook: 'The fastest way to learn AI and systems design is to build them.',
+        pageVariant: 'narrative',
+        orgBrief: {
+          data: [
+            { label: 'Founded', value: '2025' },
+            { label: 'Offering', value: 'Custom Multi-Agent Systems' },
+            { label: 'G2M', value: 'Intent-scored scrape \u2192 sequence \u2192 retarget' },
+            { label: 'Verticals', value: 'Service Based Businesses (Medical Practices, Law Practices, Home Services)' },
+          ],
+        },
+        storyFigure: {
+          src: '/exhibits/ldr-agent-diagram.png',
+          label: 'FIG. 01',
+          caption: 'LDR AGENT \u2014 FOUR-PHASE SYSTEM ARCHITECTURE',
+          alt: 'LDR agent system architecture diagram across four phases: scrape and score, human review, enrich and select, and email and outreach.',
+          afterParagraph: 2,
+        },
         story: [
-          "At ServiceTitan — the dominant software platform for the trades — I stepped into one of the most structured, high-velocity outbound engines in B2B SaaS. Every day was a masterclass in pipeline architecture: multi-touch sequences, ICP qualification, and the art of getting the right person on the phone at exactly the right moment.",
-          "The role demanded precision. ServiceTitan's market is competitive and the buying cycle is real — contractors are skeptical, busy, and inundated with bad sales calls. I learned how to cut through that noise by leading with insight, not pitch.",
-          "This wasn't just a job. It was a deliberate move to sharpen my outbound motion inside a world-class GTM org before taking those skills somewhere I could build from scratch.",
+          "I wanted to learn AI by shipping it. Enertia Studios was the excuse. The pitch I gave myself was simple: service businesses have broken revenue operations, most \"AI\" solutions in the SMB market are cosmetic, and I\u2019d learn faster running a company that had to sell its own work than by building in a sandbox.",
+          "I started with the outbound engine. A multi-stage pipeline that scrapes target verticals for buying signals, runs records through an Apollo \u2192 Uplead \u2192 Hunter \u2192 Smartlead.ai waterfall enrichment across multiple different sources, scores intent and key buying indicators, and routes them into sequence-aware campaigns with contextual agents assisting with follow up calls and emails.",
+          "From there the real opportunity came \u2014 building systems across every function inside a service business. AI receptionists tied to live calendars for inbound booking, qualification, and rescheduling. Operational dashboards giving teams and managers interconnected metrics across the business, paired with agents that execute the manual work behind each view. Custom LLM assistants wired into client operations with agentic tool use. Claude for reasoning, GPT-4o for execution, pgvector for memory.",
+          "The more discovery calls I ran, the better I understood the verticals and the pain inside them. That knowledge fed back into everything \u2014 the offer, the positioning, the intent signals, and the acquisition systems themselves. In Q2 of 2025, my CAC was around $130. By Q1 of this year, it was $44, driven almost entirely by sharper intent signals, better channel selection, and tighter messaging.",
+          "Every build starts with observation. Before I touch a prompt or a framework, I spend time inside the client\u2019s operation \u2014 what\u2019s repeated, what\u2019s abandoned, what the owner personally rescues every week. That\u2019s the gap. The system fills it. From there it becomes integration work: wiring APIs, LLMs, vector stores, and message queues into something that runs reliably when no one is watching it. I pick tools by constraint, not by novelty \u2014 rules where rules work, agents where they don\u2019t, cached context where a fresh LLM call would be waste. Every step has a token budget, a latency target, and a dollar-per-run ceiling. A good system is one the owner stops thinking about.",
+          "Then I ran the company. Wrote the offer. Wrote the cold-call scripts. Took the discovery calls myself \u2014 30 minutes, no deck, no AI transformation roadmap. If agents were the right fix I walked the prospect through exactly what I\u2019d build and why; if not, I told them. Multiple clients closed on $750/mo retainers. I onboarded each one personally and kept iterating on their systems month over month \u2014 prompts, targeting, sequence logic, new agents as the business surfaced new pain.",
+          "The outbound engine sends 2,000+ emails a month at 44% open and 7% reply \u2014 both above industry benchmark. For a med spa client, a custom booking and follow-up agent lifted membership conversion 38%. Across my own pipeline and client pipelines combined, the engine has generated 5,000+ intent-scored leads.",
+          "Enertia runs in parallel with the SDR seat at ServiceTitan. That was always the point. Sales operators usually end up downstream of the AI team \u2014 the people the systems get built for. I wanted to be on the other side of that equation.",
         ],
         stats: [
-          { value: 'Enterprise', label: 'SaaS segment' },
-          { value: 'Multi-touch', label: 'Outbound sequences' },
-          { value: 'ICP', label: 'Qualification methodology' },
+          { value: '2,000+', label: 'Emails sent per month' },
+          { value: '44%', label: 'Average outbound open rate' },
+          { value: '7%', label: 'Average reply rate' },
+          { value: '38%', label: 'Med spa membership CVR lift' },
         ],
-        skills: ['OUTBOUND', 'SAAS', 'GTM', 'PIPELINE', 'SEQUENCING'],
-        moments: [
+        skills: ['SYSTEMS DESIGN', 'AGENTIC WORKFLOWS', 'MULTI-AGENT ORCHESTRATION', 'FULL CYCLE SALES', 'OFFER DEVELOPMENT', 'OUTBOUND ENGINEERING'],
+        sections: [
           {
-            title: 'The Learning Curve',
-            teaser: 'Enterprise SaaS has a specific vocabulary. I had a week to learn it.',
-            body: "ServiceTitan's pitch isn't simple. You're selling software to plumbers and electricians who've run their business the same way for 20 years. The first thing I learned: don't lead with features. Lead with the cost of not changing. Once I had that frame, the rest fell into place.",
+            kind: 'skills',
+            title: 'What I Built And Ran',
+            categories: [
+              {
+                name: 'SYSTEMS SHIPPED',
+                entries: [
+                  { name: 'Autonomous Outbound Engine', description: 'Multi-stage pipeline \u2014 scrape vertical signals, enrich through Apollo/Hunter/Snov, score intent, route to sequence-aware campaigns.' },
+                  { name: 'AI Receptionist', description: 'Tied to live calendars for inbound booking, qualification, and appointment confirmation.' },
+                  { name: 'Onboarding Agent', description: 'Walks new clients through setup and configuration without human handoff.' },
+                  { name: 'Custom LLM Chatbots', description: 'Wired into client operations with agentic tool use \u2014 actions, not just answers.' },
+                  { name: 'Contextual Follow-Up', description: 'Post-call email sequences drafted from the outcome of each conversation.' },
+                ],
+              },
+              {
+                name: 'FULL CYCLE',
+                entries: [
+                  { name: 'Offer Development', description: 'Wrote the pitch, positioning, and pricing from scratch.' },
+                  { name: 'Cold-Call Scripting', description: 'Built the outbound scripts that sold the work.' },
+                  { name: 'Discovery & Close', description: 'Took every 30-minute discovery personally and closed direct.' },
+                  { name: 'Client Onboarding', description: 'Owned each client\u2019s setup end-to-end \u2014 no support queue.' },
+                  { name: 'Monthly Iteration', description: 'Prompts, targeting, and sequence logic tuned every cycle based on what ran.' },
+                ],
+              },
+              {
+                name: 'OUTBOUND METRICS',
+                kind: 'stats',
+                entries: [
+                  { name: '2,000+', description: 'Emails per month' },
+                  { name: '44%', description: 'Open rate' },
+                  { name: '7%', description: 'Reply rate' },
+                  { name: '$750/mo', description: 'Retainer close' },
+                ],
+              },
+            ],
           },
           {
-            title: 'ICP Clarity',
-            teaser: 'Not every contractor is the right fit. Finding the signal changes everything.',
-            body: "The best prospects weren't the biggest shops — they were multi-truck operations where the owner was still scheduling from a spreadsheet. Once I identified that signal, my connect rate nearly doubled. Qualification is the most underrated skill in outbound.",
-          },
-          {
-            title: 'The Sequence That Moved',
-            teaser: 'I rebuilt my outreach sequence at 30 days in. The difference was immediate.',
-            body: "The default sequence was volume-first: call, email, call, email. I added a pattern interrupt — a short voicemail referencing a specific operational problem I knew they had. Reply rates went up. Relevance beats repetition every time.",
+            kind: 'moments',
+            title: 'Case Studies',
+            moments: [
+              {
+                title: 'The Outbound Engine',
+                teaser: 'Eight stages, one pipeline, double the industry benchmark.',
+                body: "Scrape Google Maps for the target vertical and geography. Pre-filter by category, size, and website signals. Parse structured data and detect hiring signals, ad spend, and tech stack. Run the record through an Apollo \u2192 Hunter \u2192 Snov enrichment waterfall so each step fills what the prior missed. Score intent 0\u2013100 based on contact quality and website signals. Route to Snov campaigns by vertical. Generate a sequence-aware daily call queue with per-lead pitch angles, then draft Initial / Bump / Breakup follow-ups from the outcome of every call. 5,000+ intent-scored leads. 44% open. 7% reply.",
+              },
+              {
+                title: 'The Med Spa Win',
+                teaser: "The front desk couldn\u2019t follow up consistently. The agent never missed.",
+                body: "A med spa was losing membership conversion at the consultation-to-commit step. I built a custom AI agent that books consultations, sends pre-visit prep, handles post-visit follow-up, and nudges consults toward membership with personalized offers. The agent never forgets, never takes a day off, and never argues about who owns the follow-up. Membership conversion rate lifted 38%.",
+              },
+              {
+                title: 'The Dual Track',
+                teaser: "The sales operator shouldn\u2019t be downstream of the AI team.",
+                body: "Enertia shipped alongside a full-time SDR role at ServiceTitan. Same person writing cold-call scripts by day was writing prompts by night. That combination was the whole thesis \u2014 sales operators usually consume AI tooling, not build it. The portfolio version of this role isn\u2019t a side hustle; it\u2019s proof that someone from the commercial side can architect and ship production AI.",
+              },
+            ],
           },
         ],
       },
       {
         index: '02',
-        company: 'ENERTIA STUDIOS',
-        role: 'FREELANCE AI SYSTEMS ARCHITECT',
-        year: '2025',
-        stat: '43% OPEN RATE · 39% CVR · 30%+ CONVERSION LIFT',
-        descriptor: 'Automated revenue systems for creators',
-        hook: 'The most valuable system I built ran itself.',
-        pageVariant: 'system',
+        company: 'SERVICETITAN',
+        role: 'SALES DEVELOPMENT REPRESENTATIVE',
+        year: '2025 — Present',
+        stat: '104% Q1 · 17% CLOSE · NOOKS BETA',
+        descriptor: 'SDR by day. AI systems by night.',
+        hook: 'The step back turned out to be the sharpest forward move I\u2019ve made in years.',
+        pageVariant: 'narrative',
+        orgBrief: {
+          tagline: 'Complete field software for the trades.',
+          data: [
+            { label: 'Valuation', value: '$10B+ · NASDAQ: TTAN' },
+            { label: 'Vertical', value: 'Service trades' },
+            { label: 'ICP', value: 'Multi-truck SMB contractors' },
+            { label: 'My Segment', value: 'SMB Trades · Hybrid AE scope' },
+          ],
+        },
         story: [
-          "Enertia Studios came to me with a conversion problem. Their creator-facing funnels were leaky, manual, and slow — every handoff was a potential drop. I rebuilt their backend automation stack from the ground up.",
-          "Using a combination of no-code tooling and custom workflow design, I automated the follow-up sequences, lead scoring, and onboarding flows that previously required manual intervention at every step. The result: 30%+ improvement in conversion efficiency across their core funnels.",
-          "This engagement deepened my appreciation for systems thinking. The best revenue ops isn't about working harder — it's about designing processes that compound over time.",
+          "Mark Cuban\u2019s advice for former founders is simple: get into sales. Master sales. I took him at his word \u2014 and when the job market tightened, an SDR seat at ServiceTitan was how I made the constraint productive.",
+          "The SMB Trades seat isn\u2019t what most people picture when they hear \u201cSDR.\u201d It\u2019s source-to-meeting, but the meeting is real \u2014 30- to 60-minute GAP-methodology discovery calls with contractors running multi-truck operations. I\u2019m getting into their workflow top to bottom, quantifying their pain in dollars, and qualifying the demo before an AE ever picks it up. It\u2019s the hardest SDR role I\u2019ve seen.",
+          "I built a Chrome extension to augment the work. It researches the prospect for buying signals, enriches records, generates pitch angles, surfaces objection handles pulled from my prior notes, and drafts outbound emails. It listens to live calls and gives real-time coaching. It runs role-play simulations with AI decision-makers so I can rehearse new objection patterns before I hit them on the phone. Same class of tooling I\u2019m shipping at Enertia \u2014 just turned inward on my own workflow.",
+          "The numbers followed. 104% of Q1 quota. 17% close-won on sourced opportunities. Selected for the Nooks beta program to provide product feedback that shaped the rollout across the rest of the sales org. Trained newer SDRs on the tooling and the methodology.",
+          "The SDR seat was supposed to be a step back. It turned into the most productive constraint I\u2019ve had in years \u2014 combat-tested sales craft during the day, AI systems building at night, and a front-row seat to where the next generation of revenue tooling actually gets built.",
         ],
         stats: [
-          { value: '43%', label: 'Average outbound email open rate' },
-          { value: '39%', label: 'Conversation rate' },
-          { value: '30%+', label: 'Improvement in conversion efficiency (early pilot clients)' },
+          { value: '104%', label: 'Q1 quota attainment' },
+          { value: '17%', label: 'Close-won on sourced opps' },
+          { value: '7', label: 'Chrome extension features' },
+          { value: 'Nooks Beta', label: 'Selected for product feedback' },
         ],
-        skills: ['CONTEXT ENGINEERING', 'SYSTEMS DESIGN', 'API INTEGRATIONS', 'FULL SALES CYCLE', 'OUTBOUND CADENCE DESIGN'],
-        moments: [
+        skills: ['OUTBOUND', 'GAP METHODOLOGY', 'DISCOVERY', 'AI TOOLING', 'ENTERPRISE SAAS', 'SALES ENGINEERING'],
+        sections: [
           {
-            title: 'The Audit',
-            teaser: 'Before I could fix anything, I had to map everything that was broken.',
-            body: "I signed up as a creator and went through onboarding manually. There were 11 places where a lead could fall through with no follow-up. That audit became the roadmap.",
-          },
-          {
-            title: 'The First Win',
-            teaser: 'One automation, deployed in week two, paid for the entire engagement.',
-            body: "Their biggest drop-off was between signup and first event creation. I built a 5-day onboarding sequence that held creators through their first post. Completion rate went from 34% to 61% in the first month.",
-          },
-          {
-            title: 'The Compound Effect',
-            teaser: "Automations don't just save time. They compound.",
-            body: "By month three, the systems were interacting with each other — lead scoring triggering sequences, conversions feeding back into the scoring model. The 30% efficiency gain wasn't a ceiling. It was a floor.",
+            kind: 'skills',
+            title: 'What I Got Good At',
+            categories: [
+              {
+                name: 'SALES CRAFT',
+                entries: [
+                  { name: 'GAP Methodology', description: 'Full-cycle discovery that moves prospects from surface pain to quantified cost-of-inaction.' },
+                  { name: 'Consultative & Conversational Discovery', description: '30\u201360 minute deep-dives mapping workflow top to bottom before any demo hand-off.' },
+                  { name: 'Objection Handling', description: 'Note-backed responses drafted from prior calls, surfaced in real time during live conversations.' },
+                  { name: 'Pipeline Architecture', description: 'Multi-touch sequencing across outbound channels, structured around ICP signal over volume.' },
+                ],
+              },
+              {
+                name: 'SYSTEMS & TOOLING',
+                entries: [
+                  { name: 'Chrome Extension Development', description: 'Built a 7-feature AI tool deployed into my own daily workflow \u2014 buying signals, pitch angles, call coaching, role-play simulations.' },
+                  { name: 'Prompt Engineering', description: 'Context-aware prompts for research, personalization, and follow-up drafted in my own voice.' },
+                  { name: 'AI Agent Orchestration', description: 'Live-call coaching agents and AI decision-maker role-play for objection rehearsal.' },
+                  { name: 'Workflow Automation', description: 'Enrichment, sourcing, and handoff flows connecting Apollo, HubSpot, and Salesforce.' },
+                ],
+              },
+              {
+                name: 'FUNNEL METRICS',
+                kind: 'stats',
+                entries: [
+                  { name: '68.3%', description: 'Booked Meeting Rate' },
+                  { name: '81%', description: 'Stick Rate' },
+                  { name: '$78K', description: 'Average TCV' },
+                  { name: '91%', description: 'Qualification Rate' },
+                ],
+              },
+            ],
           },
         ],
       },
@@ -322,12 +416,12 @@ function SectionLabel() {
   }, [isInView]);
 
   return (
-    <div ref={ref} style={{ marginBottom: 80, minHeight: 20 }}>
+    <div ref={ref} style={{ marginBottom: 80, minHeight: 32 }}>
       <span style={{
         color: '#FF3A2D',
-        fontSize: 11,
-        fontWeight: 600,
-        letterSpacing: '0.22em',
+        fontSize: 22,
+        fontWeight: 700,
+        letterSpacing: '0.18em',
         textTransform: 'uppercase',
         opacity: isInView ? 1 : 0,
         transition: 'opacity 0.4s',
@@ -381,23 +475,23 @@ function ActTitle({ act }: { act: Act }) {
 
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <div style={{
-          fontSize: 10,
+          fontSize: 13,
           fontWeight: 700,
           letterSpacing: '0.22em',
           color: '#FF3A2D',
-          opacity: 0.75,
+          opacity: 0.82,
           textTransform: 'uppercase',
           lineHeight: 1.4,
         }}>
           {act.title}
         </div>
         <div style={{
-          fontSize: 9,
+          fontSize: 11,
           letterSpacing: '0.18em',
           color: '#FF3A2D',
-          opacity: 0.38,
+          opacity: 0.5,
           textTransform: 'uppercase',
-          marginTop: 3,
+          marginTop: 4,
         }}>
           {act.dateRange}
         </div>
@@ -466,11 +560,11 @@ function ExperienceRow({ exp, onOpen, delay = 0 }: {
     >
       <div style={{
         color: '#FF3A2D',
-        opacity: 0.3,
-        fontSize: 11,
+        opacity: 0.5,
+        fontSize: 13,
         fontWeight: 500,
         letterSpacing: '0.12em',
-        paddingTop: 14,
+        paddingTop: 16,
         fontVariantNumeric: 'tabular-nums',
       }}>
         {exp.index}
@@ -479,12 +573,12 @@ function ExperienceRow({ exp, onOpen, delay = 0 }: {
       <div style={{ minWidth: 0 }}>
         <div style={{
           color: '#FF3A2D',
-          fontSize: 11,
+          fontSize: 14,
           fontWeight: 600,
           letterSpacing: '0.16em',
           textTransform: 'uppercase',
-          opacity: 0.38,
-          marginBottom: 8,
+          opacity: 0.65,
+          marginBottom: 10,
         }}>
           {exp.company}
         </div>
@@ -506,11 +600,11 @@ function ExperienceRow({ exp, onOpen, delay = 0 }: {
       </div>
 
       <motion.div
-        animate={{ opacity: hovered ? 0.85 : 0.35 }}
+        animate={{ opacity: hovered ? 0.95 : 0.6 }}
         transition={{ duration: 0.18 }}
         style={{
           color: '#FF3A2D',
-          fontSize: 10,
+          fontSize: 13,
           fontWeight: 600,
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
@@ -527,22 +621,22 @@ function ExperienceRow({ exp, onOpen, delay = 0 }: {
         display: 'flex',
         justifyContent: 'flex-end',
         alignItems: 'center',
-        gap: 8,
+        gap: 10,
         alignSelf: 'center',
       }}>
         <span style={{
           color: '#FF3A2D',
-          fontSize: 10,
-          opacity: 0.3,
+          fontSize: 13,
+          opacity: 0.55,
           letterSpacing: '0.12em',
           fontVariantNumeric: 'tabular-nums',
         }}>
           {exp.year}
         </span>
         <motion.span
-          animate={{ x: hovered ? 4 : 0, opacity: hovered ? 0.85 : 0.28 }}
+          animate={{ x: hovered ? 4 : 0, opacity: hovered ? 0.95 : 0.45 }}
           transition={{ duration: 0.15 }}
-          style={{ color: '#FF3A2D', fontSize: 14, lineHeight: 1 }}
+          style={{ color: '#FF3A2D', fontSize: 16, lineHeight: 1 }}
         >
           →
         </motion.span>
